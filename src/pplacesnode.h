@@ -3,6 +3,7 @@
 
 
 #include <QSGGeometryNode>
+#include <QtQuick/qsgflatcolormaterial.h>
 
 /*
  *  Класс: геометрическое описание расположения парковочных мест.

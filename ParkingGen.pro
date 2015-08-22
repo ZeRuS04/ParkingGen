@@ -3,7 +3,6 @@ TEMPLATE = app
 QT += qml quick widgets
 
 SOURCES += main.cpp \
-    src/pvertexesnode.cpp \
     src/plinesnode.cpp \
     src/pplacesnode.cpp \
     src/parking.cpp
@@ -17,7 +16,6 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 HEADERS += \
-    src/pvertexesnode.h \
     src/plinesnode.h \
     src/pplacesnode.h \
     src/parking.h
