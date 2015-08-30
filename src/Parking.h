@@ -35,8 +35,7 @@ public:
     QRectF place() const;
     void setPlace(const QRectF &place);
 
-    uint capacity() const;
-    void setCapacity(const uint &capacity);
+    uint capacity() const;                                              // Максимальное количество парковочных мест
 
     uint area() const;
     void setArea();
@@ -44,15 +43,15 @@ public:
     QList<QRectF> placesList() const;
     void setPlacesList(const QList<QRectF> &placesList);
 
-    // TODO Подсчет площади
-    // TODO Подсчет вместимости
+
+    // TODO Улучшить подсчет вместимости
     // TODO Поверку на самопересечение
+
 
 private:
     QList<QPointF> m_vertexes;      // Массив точек
     int m_linesCount;               // Число полос
     QRectF m_place;                 // Квадрат описывающий парковочное место
-    uint m_capacity;                // Максимальное количество парковочных мест
     uint m_area;                    // Площадь парковки
     QList<QRectF> m_placesList;     // Массив парковочных мест
     // TODO Список входов/выходов с парковки
@@ -66,6 +65,7 @@ public:
     ParkingQuickItem();
     Q_PROPERTY(int size READ getArea NOTIFY parkingChanged)
 
+    Q_PROPERTY(int capacity READ getCapacity NOTIFY parkingChanged)
 
     Q_INVOKABLE void addVertex(double x, double y);                                 // Добавить вершину
     Q_INVOKABLE void changeVertex(double x, double y, uint index);                  // Изменить вершину
@@ -79,6 +79,11 @@ public:
     int getArea() const
     {
         return m_parking.area();
+    }
+
+    int getCapacity() const
+    {
+        return m_parking.capacity();
     }
 
 protected:

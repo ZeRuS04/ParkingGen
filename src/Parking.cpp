@@ -116,7 +116,6 @@ void ParkingQuickItem::geometryChanged(const QRectF &newGeometry, const QRectF &
 Parking::Parking()
     : m_linesCount(1)
     , m_place(QRectF(0,0,0,0))
-    , m_capacity(0)
     , m_area(0)
 {}
 
@@ -189,13 +188,9 @@ void Parking::setPlace(const QRectF &place)
 }
 uint Parking::capacity() const
 {
-    return m_capacity;
+    return m_area/(m_place.height()*m_place.width());
 }
 
-void Parking::setCapacity(const uint &capacity)
-{
-    m_capacity = capacity;
-}
 uint Parking::area() const
 {
     return m_area;
