@@ -171,6 +171,18 @@ ApplicationWindow {
                      onValueChanged: parking.setParkingPlaceSize(placeWidth.value, placeHeigh.value)
                  }
              }
+             Button{
+                text: "Start"
+
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.columnSpan: 2
+
+                onClicked: {
+                    parking.startMarking();
+                }
+             }
+
         }
 
     }

@@ -3,10 +3,11 @@
 
 #include <QtQuick/qsgnode.h>
 #include <QQuickItem>
-#include <QList>
+#include <QVector>
 
 #include "pplacesnode.h"
 #include "plinesnode.h"
+class AbstrAutoMarking;
 
 class ParkingNode : public QSGNode
 {
@@ -21,8 +22,8 @@ class Parking
 public:
     Parking();
 
-    QList<QPointF> vertexes() const;
-    void setVertexes(const QList<QPointF> &vertexes);
+    QVector<QPointF> vertexes() const;
+    void setVertexes(const QVector<QPointF> &vertexes);
     void addVertex(double x, double y);                                 // Добавить вершину
     void changeVertex(double x, double y, int index);                   // Изменить вершину
     void removeVertex(int index);                                       // Удалить вершину
@@ -32,16 +33,18 @@ public:
     int linesCount() const;
     void setLinesCount(int linesCount);
 
-    QRectF place() const;
-    void setPlace(const QRectF &place);
+    QSizeF place() const;
+    void setPlace(const QSizeF &place);
 
     uint capacity() const;                                              // Максимальное количество парковочных мест
 
     uint area() const;
     void setArea();
 
-    QList<QRectF> placesList() const;
-    void setPlacesList(const QList<QRectF> &placesList);
+    QVector<QRectF> placesList() const;
+    void setPlacesList(const QVector<QRectF> &placesList);
+    void pushPlaceInList(QRectF place);
+    void clearPlaces();
 
 
     // TODO Улучшить подсчет вместимости
@@ -49,11 +52,11 @@ public:
 
 
 private:
-    QList<QPointF> m_vertexes;      // Массив точек
+    QVector<QPointF> m_vertexes;      // Массив точек
     int m_linesCount;               // Число полос
-    QRectF m_place;                 // Квадрат описывающий парковочное место
+    QSizeF m_place;                 // Квадрат описывающий парковочное место
     uint m_area;                    // Площадь парковки
-    QList<QRectF> m_placesList;     // Массив парковочных мест
+    QVector<QRectF> m_placesList;     // Массив парковочных мест
     // TODO Список входов/выходов с парковки
     // TODO Список внутренних препятствий
 };
@@ -75,6 +78,7 @@ public:
     Q_INVOKABLE void setParkingPlaceSize(uint width, uint height);                  // Установить размер парк. места
     Q_INVOKABLE void setParkingLinesCount(uint count);                              // Установить число полос
     Q_INVOKABLE QPointF checkNeighboring(int x, int y, int selectIndex);            // Проверка на близость к другой точке по X
+    Q_INVOKABLE bool startMarking();                                                // Старт разметки парковки
 
     int getArea() const
     {
@@ -99,7 +103,7 @@ public slots:
 
 private:
     Parking m_parking;
-
+    AbstrAutoMarking *m_markingAlg;
     bool m_geometryChanged;
     bool m_parkingChanged;
 };

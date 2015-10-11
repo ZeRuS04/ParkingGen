@@ -15,7 +15,7 @@ public:
     PLinesNode(float size, const QColor &color);
 
 
-    void updateGeometry(const QRectF &bounds, const QList<QPointF> &points);
+    void updateGeometry(const QRectF &bounds, const QVector<QPointF> &points);
 
 
 private:

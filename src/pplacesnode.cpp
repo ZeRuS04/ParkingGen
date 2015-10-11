@@ -5,7 +5,7 @@ PPlacesNode::PPlacesNode(float size, const QColor &color)
 {
     setGeometry(&m_geometry);
     m_geometry.setLineWidth(size);
-    m_geometry.setDrawingMode(GL_QUADS);
+    m_geometry.setDrawingMode(GL_POLYGON);
 
     QSGFlatColorMaterial *material = new QSGFlatColorMaterial;
     material->setColor(color);
@@ -13,7 +13,7 @@ PPlacesNode::PPlacesNode(float size, const QColor &color)
     setFlag(QSGNode::OwnsMaterial);
 }
 
-void PPlacesNode::updateGeometry(const QRectF &bounds, const QList<QRectF> &places)
+void PPlacesNode::updateGeometry(const QRectF &bounds, const QVector<QRectF> &places)
 {
     int segmentsCount = places.size()*4;
     if(segmentsCount > 0){

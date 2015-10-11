@@ -1,12 +1,17 @@
-#include "parking.h"
+#include <ctime>
 
+#include "parking.h"
+#include "abstrautomarking.h"
+#include "simpleautomarking.h"
 /***********************************
  *         ParkingQuickItem:
  ***********************************/
 ParkingQuickItem::ParkingQuickItem()
     : m_geometryChanged(false)
     , m_parkingChanged(false)
+    , m_markingAlg(NULL)
 {
+    m_markingAlg = new SimpleAutoMarking();
     setFlag(ItemHasContents, true);
 }
 
@@ -44,7 +49,7 @@ int ParkingQuickItem::getY(int index)
 void ParkingQuickItem::setParkingPlaceSize(uint width, uint height)
 {
     m_parkingChanged = true;
-    m_parking.setPlace(QRectF(0,0,width, height));
+    m_parking.setPlace(QSizeF(width, height));
     update();
 }
 
@@ -72,6 +77,24 @@ QPointF ParkingQuickItem::checkNeighboring(int x, int y, int selectIndex)
     return retPoint;
 }
 
+bool ParkingQuickItem::startMarking()
+{
+    uint start = clock();
+    if( m_markingAlg  == NULL) {
+        qCritical("Marking algorithm was not initialized!");
+        return false;
+    }
+
+    m_parking.clearPlaces();
+    int retErr = m_markingAlg->start(&m_parking);
+    uint end = clock();
+    qCritical("Marking algorithm finished. Time: %d msec. Return %d!", end - start, retErr);
+    m_parkingChanged = true;
+    update();
+    return retErr;
+
+}
+
 
 QSGNode *ParkingQuickItem::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *)
 {
@@ -88,7 +111,7 @@ QSGNode *ParkingQuickItem::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdateP
 
     }
     if (m_geometryChanged || m_parkingChanged) {
-//        QList<QPointF> *points = new QList<QPointF>;
+//        QVector<QPointF> *points = new QVector<QPointF>;
         node->m_lines->updateGeometry(bounds, m_parking.vertexes());
         node->m_places->updateGeometry(bounds, m_parking.placesList());
         emit parkingChanged();
@@ -115,16 +138,16 @@ void ParkingQuickItem::geometryChanged(const QRectF &newGeometry, const QRectF &
 
 Parking::Parking()
     : m_linesCount(1)
-    , m_place(QRectF(0,0,0,0))
+    , m_place(QSizeF(0,0))
     , m_area(0)
 {}
 
-QList<QPointF> Parking::vertexes() const
+QVector<QPointF> Parking::vertexes() const
 {
     return m_vertexes;
 }
 
-void Parking::setVertexes(const QList<QPointF> &vertexes)
+void Parking::setVertexes(const QVector<QPointF> &vertexes)
 {
     m_vertexes = vertexes;
     setArea();
@@ -177,12 +200,12 @@ void Parking::setLinesCount(int linesCount)
 {
     m_linesCount = linesCount;
 }
-QRectF Parking::place() const
+QSizeF Parking::place() const
 {
     return m_place;
 }
 
-void Parking::setPlace(const QRectF &place)
+void Parking::setPlace(const QSizeF &place)
 {
     m_place = place;
 }
@@ -223,14 +246,25 @@ void Parking::setArea()
     }
     m_area = abs(res/2);
 }
-QList<QRectF> Parking::placesList() const
+QVector<QRectF> Parking::placesList() const
 {
     return m_placesList;
 }
 
-void Parking::setPlacesList(const QList<QRectF> &placesList)
+void Parking::setPlacesList(const QVector<QRectF> &placesList)
 {
     m_placesList = placesList;
+}
+
+void Parking::pushPlaceInList(QRectF place)
+{
+    m_placesList << place;
+
+}
+
+void Parking::clearPlaces()
+{
+    m_placesList.clear();
 }
 
 

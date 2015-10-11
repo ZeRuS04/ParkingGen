@@ -13,7 +13,7 @@ PLinesNode::PLinesNode(float size, const QColor &color)
     setFlag(QSGNode::OwnsMaterial);
 }
 
-void PLinesNode::updateGeometry(const QRectF &bounds, const QList<QPointF> &points)
+void PLinesNode::updateGeometry(const QRectF &bounds, const QVector<QPointF> &points)
 {
 
     int segmentsCount = points.size();

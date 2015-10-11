@@ -14,7 +14,7 @@ class PPlacesNode : public QSGGeometryNode
 public:
     PPlacesNode(float size, const QColor &color);
 
-    void updateGeometry(const QRectF &bounds, const QList<QRectF> &places);
+    void updateGeometry(const QRectF &bounds, const QVector<QRectF> &places);
 
 
 private:
