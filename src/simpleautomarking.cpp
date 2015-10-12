@@ -66,7 +66,7 @@ int SimpleAutoMarking::initialGrid()
     for(int j = 0; j < (m_gridWidth); j++){
         m_grid[j] = new bool[m_gridHeight];
         for( int i = 0; i < (m_gridHeight); i++ ){
-            m_grid[j][i] = polygon.containsPoint(QPointF(m_ox.first() + j * m_length, m_oy.first() + i * m_length), Qt::OddEvenFill);
+            m_grid[j][i] = polygon.containsPoint(QPointF(m_ox.first() + j * m_length, m_oy.first() + i * m_length), Qt::WindingFill);
         }
     }
     return rcod;
@@ -76,7 +76,7 @@ void SimpleAutoMarking::fillPlaces()
 {
     for(int i = 1; i < m_gridWidth; ++i) {
         for( int j = 1; j < m_gridHeight; j++ ){
-            if(m_grid[i-1][j-1] && m_grid[1][j-1] && m_grid[i-1][1] && m_grid[1][1])
+            if(m_grid[i-1][j-1] && m_grid[i][j-1] && m_grid[i-1][j] && m_grid[i][j])
             {
                 m_parking->pushPlaceInList(QRectF(QPointF(m_ox.first() + (i-1) * m_length, m_oy.first() + (j-1) * m_length), QSize(m_length, m_length)));
             }

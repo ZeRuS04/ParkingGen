@@ -170,6 +170,7 @@ ApplicationWindow {
                      maximumValue: 10000
                      onValueChanged: parking.setParkingPlaceSize(placeWidth.value, placeHeigh.value)
                  }
+                 Component.onCompleted: parking.setParkingPlaceSize(placeWidth.value, placeHeigh.value)
              }
              Button{
                 text: "Start"

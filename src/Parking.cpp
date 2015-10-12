@@ -104,7 +104,7 @@ QSGNode *ParkingQuickItem::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdateP
 
     if (!node) {
         node = new ParkingNode();
-        node->m_places = new  PPlacesNode(2, QColor("green"));
+        node->m_places = new  PPlacesNode(1, QColor("#ffff0000"));
         node->m_lines = new PLinesNode(2, QColor("steelblue"));
         node->appendChildNode(node->m_lines);
         node->appendChildNode(node->m_places);
