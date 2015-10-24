@@ -12,20 +12,7 @@ ApplicationWindow {
     visible: true
     property real scaleCof: 1
     color: "white"
-//    ColumnLayout{
-//        id: mainLayout
-//        anchors.fill: parent;
-//        ScrollView{
-//            id: mainScrollArea;
-//            anchors.fill: parent;
-//            contentItem: Item{
-//                id: parkingField
-//                width: parent.width*scaleCof; height: parent.height*scaleCof;
 
-//            }
-//        }
-
-//    }
     Item {
         id: parkingFiel
         anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top; anchors.bottom: data.top
@@ -33,82 +20,117 @@ ApplicationWindow {
             id: parking
             anchors.fill: parent
 
-
+            property int currentVertex: -1
             property int vertexCount: 0
-            signal posChanged(var ind);
+            signal posChanged(var ind)
 
             MouseArea{
                 id: parkingMA
                 anchors.fill: parent;
+                hoverEnabled: mode.currentIndex === 1
                 onPressed: {
-                    parking.addVertex(mouse.x, mouse.y);
-                    parking.vertexCount++;
+                    switch(mode.currentIndex){
+                    case 0:
+                        if(parking.currentVertex === -1) {
+                            parking.addVertex(mouse.x, mouse.y);
+                            parking.vertexCount++;
+                            parking.currentVertex = parking.vertexCount-1;
+                        }
+                        break;
+                    case 1:
+                            parking.addEntry(mouse.x, mouse.y, entry.rotation)
+                        break;
+                    }
                 }
                 onPositionChanged: {
-                    var point = parking.checkNeighboring(mouse.x,mouse.y, parking.vertexCount-1);
-                    parking.changeVertex(point.x, point.y, parking.vertexCount-1);
-                    parking.posChanged(parking.vertexCount-1);
+                    switch(mode.currentIndex){
+                    case 0:
+                        var point = parking.checkNeighboring(mouse.x,mouse.y,  parking.currentVertex);
+                        parking.changeVertex(point.x, point.y,  parking.currentVertex);
+                        parking.posChanged(parking.currentVertex);
+                        break;
+                    }
                 }
-
-                onClicked:{
-
-
+                onReleased:{
+                    parking.currentVertex = -1;
                 }
             }
         }
         Repeater{
             id: parkingVertecies
-            model: parking.vertexCount
+            model: parking.vertexes
             delegate: Rectangle{
                 id: vertex
-                property bool select: false
+                property alias select: vertexMA.pressed
                 property int i: index
-                x: parking.getX(index)-width/2;            y: parking.getY(index)-height/2;
+                x: modelData.x - width/2
+                y: modelData.y - height/2
                 color: (index == 0) || (index == parking.vertexCount-1) ? "red" : "green"
                 border.color: "black"
-                border.width: select ? 2 : 0
-                width: 10 + (select ? 5 : 0)
+                border.width: select ? 1 : 0
+                width: 10
                 height: width
                 radius: width/2
-
-                onXChanged: {
-                    if(vertexMA.drag.active){
-                        var point = parking.checkNeighboring(x+width/2, y+height/2, i);
-                        vertex.x = point.x - width/2;   vertex.y = point.y - height/2;
-                        parking.changeVertex(point.x, point.y, i);
-                    }
-                }
-                onYChanged: {
-                    if(vertexMA.drag.active){
-                        var point = parking.checkNeighboring(x+width/2, y+height/2, i)
-                        vertex.x = point.x - width/2;   vertex.y = point.y - height/2;
-                        parking.changeVertex(point.x, point.y, i)
-                    }
-                }
 
                 MouseArea{
                     id: vertexMA
                     anchors.fill: parent;
                     hoverEnabled: true;
-                    onEntered: width+=5;
-                    onExited: width-=5;
-                    drag.target: vertex
-                    onClicked: {
-                        vertex.select != vertex.select;
-                    }
-
-                }
-                Connections{
-                    target: parking
-                    onPosChanged: {
-                        if(ind == vertex.i){
-                            x = parking.getX(ind)-width/2;
-                            y = parking.getY(ind)-height/2;
-                        }
+                    onPressed: {
+                        parking.currentVertex = parent.i;
+                        mouse.accepted = false;
                     }
                 }
             }
+        }
+        Repeater{
+            id: parkingRoads
+            model: parking.roads
+            delegate:         Rectangle{
+                x: modelData.x
+                y: modelData.y
+                width: placeWidth.value
+                height: placeHeigh.value
+                color: modelData.isBegin() ? "lightgreen"
+                                           : (modelData.isEnd() ? "darkred"
+                                                               : "skyblue")
+            }
+        }
 
+        Rectangle{
+            id:  entry
+            property var point: parking.findPointonLine(parkingMA.mouseX - width/2,parkingMA.mouseY - height/2)
+            x: point.x
+            y: point.y
+            visible: mode.currentIndex === 1
+            width: placeWidth.value * 2
+            height: placeHeigh.value
+            color: "transparent"
+            rotation: 0
+            Rectangle {
+                width: placeWidth.value
+                height: parent.height
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                color: "darkred"
+            }
+            Rectangle {
+                width: placeWidth.value
+                height: parent.height
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                color: "lightgreen"
+            }
+            MouseArea {
+                anchors.fill: parent
+                onWheel: {
+                    if (wheel.angleDelta.y > 0)
+                        parent.rotation += 90;
+                    else
+                        parent.rotation -= 90;
+                }
+                onPressed: mouse.accepted = false
+            }
         }
 
         Rectangle{
@@ -118,7 +140,6 @@ ApplicationWindow {
             border.color: "red"
             color: "transparent"
         }
-
     }
 
     Item{
@@ -145,10 +166,10 @@ ApplicationWindow {
              Row{
                  Layout.fillHeight: true
                  Layout.columnSpan: 2
+                 spacing: 20
                  Text{
 //                     width: 100
                      text: "Parking place size: w=";
-                     verticalAlignment: Text.AlignVCenter
                  }
                  SpinBox{
                      id: placeWidth
@@ -160,7 +181,6 @@ ApplicationWindow {
                  }
                  Text{
                      text: " h=";
-                     verticalAlignment: Text.AlignVCenter
                  }
                  SpinBox{
                      id: placeHeigh
@@ -169,6 +189,14 @@ ApplicationWindow {
                      minimumValue: 10
                      maximumValue: 10000
                      onValueChanged: parking.setParkingPlaceSize(placeWidth.value, placeHeigh.value)
+                 }
+                 Text{
+                     text: "Mode:";
+                 }
+                 ComboBox {
+                     id: mode
+                     width: 100
+                     model: [ "Add Vertex", "Add exit" ]
                  }
                  Component.onCompleted: parking.setParkingPlaceSize(placeWidth.value, placeHeigh.value)
              }
@@ -187,6 +215,4 @@ ApplicationWindow {
         }
 
     }
-
-
 }

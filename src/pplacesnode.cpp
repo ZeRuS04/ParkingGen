@@ -5,7 +5,7 @@ PPlacesNode::PPlacesNode(float size, const QColor &color)
 {
     setGeometry(&m_geometry);
     m_geometry.setLineWidth(size);
-    m_geometry.setDrawingMode(GL_QUADS);
+    m_geometry.setDrawingMode(GL_LINE_LOOP);
 
     QSGFlatColorMaterial *material = new QSGFlatColorMaterial;
     material->setColor(color);
@@ -13,7 +13,7 @@ PPlacesNode::PPlacesNode(float size, const QColor &color)
     setFlag(QSGNode::OwnsMaterial);
 }
 
-void PPlacesNode::updateGeometry(const QRectF &bounds, const QVector<QRectF> &places)
+void PPlacesNode::updateGeometry(const QRectF &bounds, const QVector<ParkingPlace*> &places)
 {
     int segmentsCount = places.size()*4;
     if(segmentsCount > 0){
@@ -21,10 +21,10 @@ void PPlacesNode::updateGeometry(const QRectF &bounds, const QVector<QRectF> &pl
         QSGGeometry::Point2D *vertices = m_geometry.vertexDataAsPoint2D();
 
         for (int i = 0; i < places.size(); ++i) {
-            vertices[i*4].set(places.at(i).topLeft().x(), places.at(i).topLeft().y());
-            vertices[i*4+1].set(places.at(i).topRight().x(), places.at(i).topRight().y());
-            vertices[i*4+2].set(places.at(i).bottomRight().x(), places.at(i).bottomRight().y());
-            vertices[i*4+3].set(places.at(i).bottomLeft().x(), places.at(i).bottomLeft().y());
+            vertices[i*4].set(places.at(i)->x(), places.at(i)->y());
+            vertices[i*4+1].set(places.at(i)->x(), places.at(i)->y() + places.at(i)->height());
+            vertices[i*4+2].set(places.at(i)->x() + places.at(i)->width(), places.at(i)->y());
+            vertices[i*4+3].set(places.at(i)->x() + places.at(i)->width(), places.at(i)->y() + places.at(i)->height());
         }
         markDirty(QSGNode::DirtyGeometry);
     }

@@ -1,4 +1,5 @@
 #include <ctime>
+#include <qmath.h>
 
 #include "parking.h"
 #include "abstrautomarking.h"
@@ -60,7 +61,7 @@ void ParkingQuickItem::setParkingLinesCount(uint count)
     update();
 }
 
-QPointF ParkingQuickItem::checkNeighboring(int x, int y, int selectIndex)
+QPointF ParkingQuickItem::checkNeighboring(double x, double y, int selectIndex)
 {
     QPointF retPoint(x,y);
     for(int i = 0; i < m_parking.vertexes().size(); i++){
@@ -77,6 +78,38 @@ QPointF ParkingQuickItem::checkNeighboring(int x, int y, int selectIndex)
     return retPoint;
 }
 
+QPointF ParkingQuickItem::findPointonLine(double x, double y)
+{
+    QPointF point(x,y);
+
+//    if(m_parking.vertexes().isEmpty())
+//        return point;
+//    QList<int> list;
+//    QPointF lastPoint(m_parking.vertexes().last());
+
+//    // Ищем подходящие стороны многоугольника
+//    for(int i = 0; i < m_parking.vertexes().size(); i++){
+//        QPointF curPoint = m_parking.vertexes().at(i);
+//        if(((curPoint.x() <= x) && (x <= lastPoint.x())) || ((curPoint.x() >= x) && (x >= lastPoint.x())) ||
+//           ((curPoint.y() <= y) && (y <= lastPoint.y())) || ((curPoint.y() >= y) && (y >= lastPoint.y()))){
+//            list << i;
+//        }
+//        lastPoint = curPoint;
+//    }
+//    // проверяем среди подходящих на отсутствие пересечений
+//    foreach(int i, list){
+//        if(i != 0)
+//            lastPoint = m_parking.vertexes().at(i-1);
+//        else
+//            lastPoint = m_parking.vertexes().last();
+//        QPointF curPoint = m_parking.vertexes().at(i);
+
+//    }
+
+    return point;
+
+}
+
 bool ParkingQuickItem::startMarking()
 {
     uint start = clock();
@@ -90,9 +123,44 @@ bool ParkingQuickItem::startMarking()
     uint end = clock();
     qCritical("Marking algorithm finished. Time: %d msec. Return %d!", end - start, retErr);
     m_parkingChanged = true;
+    m_geometryChanged = true;
     update();
     return retErr;
 
+}
+
+void ParkingQuickItem::addEntry(double x, double y, int angle)
+{
+    QRectF entry, exit;
+    int width = m_parking.place().width();
+    switch(angle % 360) {
+    case 0:
+        exit = QRectF(x - width, y - width/2, width, width);
+        entry = QRectF(x, y - width/2, width, width);
+        break;
+    case 90:
+        exit = QRectF(x - width/2, y, width, width);
+        entry = QRectF(x - width/2, y - width, width, width);
+        break;
+    case 180:
+        entry = QRectF(x - width/2, y, width, width);
+        exit = QRectF(x - width/2, y - width, width, width);
+        break;
+    case 270:
+        entry = QRectF(x - width/2, y, width, width);
+        exit = QRectF(x - width/2, y - width, width, width);
+        break;
+    }
+
+    RoadPlace *rEntry = new RoadPlace(entry);
+    rEntry->setIsBegin(true);
+    RoadPlace *rExit = new RoadPlace(exit);
+    rExit->setIsEnd(true);
+
+    m_parking.pushRoadInList(rEntry);
+    m_parking.pushRoadInList(rExit);
+
+    emit parkingChanged();
 }
 
 
@@ -246,17 +314,17 @@ void Parking::setArea()
     }
     m_area = abs(res/2);
 }
-QVector<QRectF> Parking::placesList() const
+QVector<ParkingPlace*> Parking::placesList() const
 {
     return m_placesList;
 }
 
-void Parking::setPlacesList(const QVector<QRectF> &placesList)
+void Parking::setPlacesList(const QVector<ParkingPlace *> &placesList)
 {
     m_placesList = placesList;
 }
 
-void Parking::pushPlaceInList(QRectF place)
+void Parking::pushPlaceInList(ParkingPlace* place)
 {
     m_placesList << place;
 
@@ -266,6 +334,57 @@ void Parking::clearPlaces()
 {
     m_placesList.clear();
 }
+
+void Parking::transformVertexes(double angle)
+{
+    QPointF cPoint = findCenter(m_vertexes);
+    for(int i = 0; i < m_vertexes.length(); i++) {
+        m_vertexes[i].setX((m_vertexes[i].x()-cPoint.x()) * qCos(angle) - (m_vertexes[i].y() - cPoint.y()) * qSin(angle) + cPoint.x());
+        m_vertexes[i].setY((m_vertexes[i].x()-cPoint.x()) * qSin(angle) + (m_vertexes[i].y() - cPoint.y()) * qCos(angle) + cPoint.y());
+    }
+}
+
+QPointF Parking::findCenter(QVector<QPointF> vertexes)
+{
+    QVector<double> ox;
+    QVector<double> oy;
+
+    foreach (QPointF point, vertexes) {
+        ox << point.x();
+        oy << point.y();
+    }
+
+    qSort(ox.begin(), ox.end());
+    qSort(oy.begin(), oy.end());
+
+    return QPointF(ox.last() - ox.first(), oy.last() - oy.first());
+}
+QVector<RoadPlace *> Parking::getRoads() const
+{
+    return m_roads;
+}
+
+void Parking::pushRoadInList(RoadPlace *road)
+{
+    m_roads << road;
+}
+
+void Parking::setRoads(const QVector<RoadPlace *> &roads)
+{
+    m_roads = roads;
+}
+
+void Parking::clearRoads()
+{
+    m_roads.clear();
+}
+
+void Parking::removeRoad(int index)
+{
+    if(index > 0 && index < m_roads.length());
+        m_roads.remove(index);
+}
+
 
 
 

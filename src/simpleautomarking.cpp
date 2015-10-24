@@ -1,6 +1,7 @@
 #include <QPolygonF>
 #include "simpleautomarking.h"
-#include "math.h"
+#include "parkingplace.h"
+#include <qmath.h>
 
 SimpleAutoMarking::SimpleAutoMarking()
   : m_gridWidth(0)
@@ -11,10 +12,9 @@ SimpleAutoMarking::SimpleAutoMarking()
 int SimpleAutoMarking::algorithm()
 {
     int rcod = OK;
-
+    transformParking();
     rcod = initialGrid();
     fillPlaces();
-
     return rcod;
 }
 
@@ -72,13 +72,45 @@ int SimpleAutoMarking::initialGrid()
     return rcod;
 }
 
+void SimpleAutoMarking::transformParking()
+{
+    QMap<double, double> angles;
+    QPointF oldVertex = m_parking->vertexes().last();
+    foreach(QPointF vertex, m_parking->vertexes()){
+        double dx = vertex.x() - oldVertex.x();
+        double dy = vertex.y() - oldVertex.y();
+        double alpha = qAtan2(dy, dx);
+        alpha = fmod(alpha,M_PI/2);
+
+        if(angles.contains(alpha)) {
+            angles[alpha] += sqrt(dx*dx+dy*dy);
+        } else {
+            angles.insert(alpha, sqrt(dx*dx+dy*dy));
+        }
+
+        oldVertex = vertex;
+    }
+    double currentKey = 0;
+    double currentValue = 0;
+
+    QMap<double, double>::const_iterator i = angles.constBegin();
+    while (i != angles.constEnd()) {
+        if(i.value() > currentValue){
+            currentKey = i.key();
+            currentValue = i.value();
+        }
+        ++i;
+    }
+    m_parking->transformVertexes(-currentKey);
+}
+
 void SimpleAutoMarking::fillPlaces()
 {
     for(int i = 1; i < m_gridWidth; ++i) {
         for( int j = 1; j < m_gridHeight; j++ ){
             if(m_grid[i-1][j-1] && m_grid[i][j-1] && m_grid[i-1][j] && m_grid[i][j])
             {
-                m_parking->pushPlaceInList(QRectF(QPointF(m_ox.first() + (i-1) * m_length, m_oy.first() + (j-1) * m_length), QSize(m_length, m_length)));
+                m_parking->pushPlaceInList(new ParkingPlace(QRectF(QPointF(m_ox.first() + (i-1) * m_length, m_oy.first() + (j-1) * m_length), QSize(m_length, m_length))));
             }
         }
     }

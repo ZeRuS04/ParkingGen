@@ -15,6 +15,7 @@ public:
     void getSimpleRect();
     int initialGrid();
 
+    void transformParking();
     void fillPlaces();
 
 private:
@@ -25,8 +26,8 @@ private:
 
     bool **m_grid;
     double m_length;
-    int m_gridWidth;
     int m_gridHeight;
+    int m_gridWidth;
 };
 
 #endif // SIMPLEAUTOMARKING_H

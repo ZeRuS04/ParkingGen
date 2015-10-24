@@ -6,9 +6,14 @@ SOURCES += main.cpp \
     src/plinesnode.cpp \
     src/pplacesnode.cpp \
     src/parking.cpp \
-    src/simpleautomarking.cpp
+    src/simpleautomarking.cpp \
+    src/abstractplace.cpp \
+    src/parkingplace.cpp \
+    src/roadplace.cpp
 
 RESOURCES += qml.qrc
+
+QMAKE_CXXFLAGS += -std=gnu++11
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -21,4 +26,7 @@ HEADERS += \
     src/pplacesnode.h \
     src/parking.h \
     src/abstrautomarking.h \
-    src/simpleautomarking.h
+    src/simpleautomarking.h \
+    src/abstractplace.h \
+    src/parkingplace.h \
+    src/roadplace.h
