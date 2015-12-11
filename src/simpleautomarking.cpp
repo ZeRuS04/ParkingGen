@@ -1,6 +1,5 @@
 #include <QPolygonF>
 #include "simpleautomarking.h"
-#include "parkingplace.h"
 #include <qmath.h>
 
 SimpleAutoMarking::SimpleAutoMarking()
@@ -110,7 +109,7 @@ void SimpleAutoMarking::fillPlaces()
         for( int j = 1; j < m_gridHeight; j++ ){
             if(m_grid[i-1][j-1] && m_grid[i][j-1] && m_grid[i-1][j] && m_grid[i][j])
             {
-                m_parking->pushPlaceInList(new ParkingPlace(QRectF(QPointF(m_ox.first() + (i-1) * m_length, m_oy.first() + (j-1) * m_length), QSize(m_length, m_length))));
+                m_parking->pushPlaceInList(new Place(QRectF(QPointF(m_ox.first() + (i-1) * m_length, m_oy.first() + (j-1) * m_length), QSize(m_length, m_length)), TYPE_PARKINGPLACE));
             }
         }
     }

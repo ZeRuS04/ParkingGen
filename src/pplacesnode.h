@@ -4,7 +4,7 @@
 
 #include <QSGGeometryNode>
 #include <QtQuick/qsgflatcolormaterial.h>
-#include "parkingplace.h"
+#include "place.h"
 /*
  *  Класс: геометрическое описание расположения парковочных мест.
  */
@@ -14,7 +14,7 @@ class PPlacesNode : public QSGGeometryNode
 public:
     PPlacesNode(float size, const QColor &color);
 
-    void updateGeometry(const QRectF &bounds, const QVector<ParkingPlace *> &places);
+    void updateGeometry(const QRectF &bounds, const QVector<Place *> &places);
 
 
 private:

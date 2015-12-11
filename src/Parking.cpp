@@ -103,7 +103,6 @@ QPointF ParkingQuickItem::findPointonLine(double x, double y)
 //        else
 //            lastPoint = m_parking.vertexes().last();
 //        QPointF curPoint = m_parking.vertexes().at(i);
-
 //    }
 
     return point;
@@ -152,10 +151,8 @@ void ParkingQuickItem::addEntry(double x, double y, int angle)
         break;
     }
 
-    RoadPlace *rEntry = new RoadPlace(entry);
-    rEntry->setIsBegin(true);
-    RoadPlace *rExit = new RoadPlace(exit);
-    rExit->setIsEnd(true);
+    Place *rEntry = new Place(entry, TYPE_ROAD);
+    Place *rExit = new Place(exit, TYPE_ROAD);
 
     m_parking.pushRoadInList(rEntry);
     m_parking.pushRoadInList(rExit);
@@ -172,16 +169,19 @@ QSGNode *ParkingQuickItem::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdateP
 
     if (!node) {
         node = new ParkingNode();
-        node->m_places = new  PPlacesNode(1, QColor("#ffff0000"));
+        node->m_places = new PPlacesNode(1, QColor("#ffff0000"));
+        node->m_roads = new PPlacesNode(1, QColor("#ff0000ff"));
         node->m_lines = new PLinesNode(2, QColor("steelblue"));
         node->appendChildNode(node->m_lines);
         node->appendChildNode(node->m_places);
+        node->appendChildNode(node->m_roads);
 
     }
     if (m_geometryChanged || m_parkingChanged) {
 //        QVector<QPointF> *points = new QVector<QPointF>;
         node->m_lines->updateGeometry(bounds, m_parking.vertexes());
         node->m_places->updateGeometry(bounds, m_parking.placesList());
+        node->m_roads->updateGeometry(bounds, m_parking.placesList());
         emit parkingChanged();
     }
 
@@ -314,25 +314,25 @@ void Parking::setArea()
     }
     m_area = abs(res/2);
 }
-QVector<ParkingPlace*> Parking::placesList() const
+QVector<Place*> Parking::placesList() const
 {
-    return m_placesList;
+    return m_places;
 }
 
-void Parking::setPlacesList(const QVector<ParkingPlace *> &placesList)
+void Parking::setPlacesList(const QVector<Place *> &placesList)
 {
-    m_placesList = placesList;
+    m_places = placesList;
 }
 
-void Parking::pushPlaceInList(ParkingPlace* place)
+void Parking::pushPlaceInList(Place* place)
 {
-    m_placesList << place;
+    m_places << place;
 
 }
 
 void Parking::clearPlaces()
 {
-    m_placesList.clear();
+    m_places.clear();
 }
 
 void Parking::transformVertexes(double angle)
@@ -359,17 +359,17 @@ QPointF Parking::findCenter(QVector<QPointF> vertexes)
 
     return QPointF(ox.last() - ox.first(), oy.last() - oy.first());
 }
-QVector<RoadPlace *> Parking::getRoads() const
+QVector<Place *> Parking::getRoads() const
 {
     return m_roads;
 }
 
-void Parking::pushRoadInList(RoadPlace *road)
+void Parking::pushRoadInList(Place *road)
 {
     m_roads << road;
 }
 
-void Parking::setRoads(const QVector<RoadPlace *> &roads)
+void Parking::setRoads(const QVector<Place *> &roads)
 {
     m_roads = roads;
 }

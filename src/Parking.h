@@ -8,7 +8,7 @@
 
 #include "pplacesnode.h"
 #include "plinesnode.h"
-#include "roadplace.h"
+#include "place.h"
 class AbstrAutoMarking;
 
 class ParkingNode : public QSGNode
@@ -16,6 +16,8 @@ class ParkingNode : public QSGNode
 public:
     PLinesNode      *m_lines;
     PPlacesNode     *m_places;
+    PPlacesNode     *m_roads;
+
 };
 
 class Parking
@@ -43,17 +45,17 @@ public:
     uint area() const;
     void setArea();
 
-    QVector<ParkingPlace *> placesList() const;
-    void setPlacesList(const QVector<ParkingPlace*> &placesList);
-    void pushPlaceInList(ParkingPlace *place);
+    QVector<Place *> placesList() const;
+    void setPlacesList(const QVector<Place*> &placesList);
+    void pushPlaceInList(Place *place);
     void clearPlaces();
 
     void transformVertexes(double angle);
     QPointF findCenter(QVector<QPointF> vertexes);
 
-    QVector<RoadPlace *> getRoads() const;
-    void pushRoadInList(RoadPlace *road);
-    void setRoads(const QVector<RoadPlace *> &roads);
+    QVector<Place *> getRoads() const;
+    void pushRoadInList(Place *road);
+    void setRoads(const QVector<Place *> &roads);
     void clearRoads();
     void removeRoad(int index);
 
@@ -66,8 +68,8 @@ private:
     int m_linesCount;                   // Число полос
     QSizeF m_place;                     // Квадрат описывающий парковочное место
     uint m_area;                        // Площадь парковки
-    QVector<ParkingPlace *> m_placesList;     // Массив парковочных мест
-    QVector<RoadPlace *> m_roads;       // Список входов/выходов с парковки
+    QVector<Place *> m_places;          // Массив парковочных мест
+    QVector<Place *> m_roads;           // Список дорог
     // TODO Список внутренних препятствий
 };
 
@@ -79,8 +81,6 @@ public:
     Q_PROPERTY(int size READ getArea NOTIFY parkingChanged)
 
     Q_PROPERTY(int capacity READ getCapacity NOTIFY parkingChanged)
-
-    Q_PROPERTY(QList<QObject*> roads READ roads NOTIFY parkingChanged)
 
     Q_PROPERTY(QVariantList vertexes READ vertexes NOTIFY parkingChanged)
 
@@ -137,7 +137,6 @@ private:
     AbstrAutoMarking *m_markingAlg;
     bool m_parkingChanged;
     bool m_geometryChanged;
-    QVariantList m_roads;
 };
 
 #endif // PARKING_H

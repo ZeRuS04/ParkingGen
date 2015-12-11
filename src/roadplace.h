@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QList>
 
-class RoadPlace : public AbstractPlace
+class RoadPlace : public Place
 {
     Q_OBJECT
 public:
@@ -14,8 +14,8 @@ public:
     void setIsEnd(bool isEnd);
     void setIsBegin(bool isBegin);
 
-    QList<ParkingPlace *> parkingPlaces() const;
-    void setParkingPlaces(const QList<ParkingPlace *> &parkingPlaces);
+    QList<Place *> parkingPlaces() const;
+    void setParkingPlaces(const QList<Place *> &parkingPlaces);
 
     QList<RoadPlace *> roads() const;
     void setRoads(const QList<RoadPlace *> &roads);
@@ -25,7 +25,7 @@ public slots:
     bool isBegin() const;
 
 private:
-    QList<ParkingPlace *> m_parkingPlaces;
+    QList<Place *> m_parkingPlaces;
     QList<RoadPlace*> m_roads;
 
     bool m_isEnd;

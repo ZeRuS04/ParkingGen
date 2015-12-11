@@ -13,7 +13,7 @@ PPlacesNode::PPlacesNode(float size, const QColor &color)
     setFlag(QSGNode::OwnsMaterial);
 }
 
-void PPlacesNode::updateGeometry(const QRectF &bounds, const QVector<ParkingPlace*> &places)
+void PPlacesNode::updateGeometry(const QRectF &bounds, const QVector<Place*> &places)
 {
     int segmentsCount = places.size()*4;
     if(segmentsCount > 0){
@@ -22,9 +22,9 @@ void PPlacesNode::updateGeometry(const QRectF &bounds, const QVector<ParkingPlac
 
         for (int i = 0; i < places.size(); ++i) {
             vertices[i*4].set(places.at(i)->x(), places.at(i)->y());
-            vertices[i*4+1].set(places.at(i)->x(), places.at(i)->y() + places.at(i)->height());
-            vertices[i*4+2].set(places.at(i)->x() + places.at(i)->width(), places.at(i)->y());
-            vertices[i*4+3].set(places.at(i)->x() + places.at(i)->width(), places.at(i)->y() + places.at(i)->height());
+            vertices[i*4+1].set(places.at(i)->x() + places.at(i)->width(), places.at(i)->y());
+            vertices[i*4+2].set(places.at(i)->x() + places.at(i)->width(), places.at(i)->y() + places.at(i)->height());
+            vertices[i*4+3].set(places.at(i)->x(), places.at(i)->y() + places.at(i)->height());
         }
         markDirty(QSGNode::DirtyGeometry);
     }

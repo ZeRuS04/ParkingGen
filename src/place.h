@@ -2,6 +2,7 @@
 #define ABSTRACTPLACE_H
 
 #include <QRectF>
+#include <QVector>
 #include <QObject>
 
 #define TYPE_UNDEFIND       0
@@ -9,12 +10,12 @@
 #define TYPE_ROAD           2
 
 
-class AbstractPlace : public QObject
+class Place : public QObject
 {
     Q_OBJECT
 
 public:
-    AbstractPlace(QRectF rect, char type, QObject *parent = 0);
+    Place(QRectF rect, int type, QObject *parent = 0);
 
     Q_PROPERTY(double x READ x WRITE setX NOTIFY xChanged)
     Q_PROPERTY(double y READ y WRITE setY NOTIFY yChanged)
@@ -29,6 +30,12 @@ public:
     double width() const;
     double height() const;
 
+    QVector<Place *> neighbors() const;
+    void clearNeighbors();
+    Place *neighbor(int index) const;
+    void setNeighbors(const QVector<Place *> &neighbors);
+    void setNeighbor(Place *neighbor, int index);
+
 public slots:
     void setX(double x);
     void setY(double y);
@@ -42,13 +49,15 @@ signals:
     void heightChanged(double height);
 
 protected:
-    char m_type;
+    int m_type;
 
     double m_x;
     double m_y;
     double m_width;
     double m_height;
 
+private:
+    QVector<Place*> m_neighbors;
 };
 
 #endif // ABSTRACTPLACE_H
