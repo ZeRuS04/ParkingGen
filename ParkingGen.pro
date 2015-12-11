@@ -7,9 +7,7 @@ SOURCES += main.cpp \
     src/pplacesnode.cpp \
     src/parking.cpp \
     src/simpleautomarking.cpp \
-    src/abstractplace.cpp \
-    src/parkingplace.cpp \
-    src/roadplace.cpp
+    src/place.cpp
 
 RESOURCES += qml.qrc
 
@@ -27,6 +25,4 @@ HEADERS += \
     src/parking.h \
     src/abstrautomarking.h \
     src/simpleautomarking.h \
-    src/abstractplace.h \
-    src/parkingplace.h \
-    src/roadplace.h
+    src/place.h
