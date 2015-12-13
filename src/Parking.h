@@ -5,7 +5,7 @@
 #include <QQuickItem>
 #include <QVector>
 #include <QVariantList>
-
+#include <QBitArray>
 #include "pplacesnode.h"
 #include "plinesnode.h"
 #include "place.h"
@@ -17,7 +17,6 @@ public:
     PLinesNode      *m_lines;
     PPlacesNode     *m_places;
     PPlacesNode     *m_roads;
-
 };
 
 class Parking
@@ -45,20 +44,19 @@ public:
     uint area() const;
     void setArea();
 
+    QList<Place *> places() const;
     QVector<Place *> placesList() const;
-    void setPlacesList(const QVector<Place*> &placesList);
+//    void setPlacesList(const QVector<Place*> &placesList);
     void pushPlaceInList(Place *place);
+    void removePlace(int index);
     void clearPlaces();
 
     void transformVertexes(double angle);
     QPointF findCenter(QVector<QPointF> vertexes);
 
-    QVector<Place *> getRoads() const;
-    void pushRoadInList(Place *road);
-    void setRoads(const QVector<Place *> &roads);
-    void clearRoads();
-    void removeRoad(int index);
+    QVector<Place *> roadsList() const;
 
+    bool changePlacetype(int index, int type, bool isEntry = false);
 
     // TODO Улучшить подсчет вместимости
     // TODO Поверку на самопересечение
@@ -68,8 +66,8 @@ private:
     int m_linesCount;                   // Число полос
     QSizeF m_place;                     // Квадрат описывающий парковочное место
     uint m_area;                        // Площадь парковки
-    QVector<Place *> m_places;          // Массив парковочных мест
-    QVector<Place *> m_roads;           // Список дорог
+    QList<Place *> m_places;          // Массив парковочных мест
+    QBitArray  m_entryMask;
     // TODO Список внутренних препятствий
 };
 
@@ -92,9 +90,9 @@ public:
     Q_INVOKABLE void setParkingPlaceSize(uint width, uint height);                  // Установить размер парк. места
     Q_INVOKABLE void setParkingLinesCount(uint count);                              // Установить число полос
     Q_INVOKABLE QPointF checkNeighboring(double x, double y, int selectIndex);      // Проверка на близость к другой точке по X
-    Q_INVOKABLE QPointF findPointonLine(double x, double y);                         // Поиск точки на одной из сторон прямоугольника
+    Q_INVOKABLE QVector3D findPointonLine(double x, double y);                         // Поиск точки на одной из сторон прямоугольника
     Q_INVOKABLE bool startMarking();                                                // Старт разметки парковки
-    Q_INVOKABLE void addEntry(double x, double y, int angle);
+    Q_INVOKABLE void addEntry(double x, double y, double w, double h, int index);
     int getArea() const
     {
         return m_parking.area();
@@ -117,8 +115,8 @@ public:
     QList<QObject*> roads() const
     {
         QList<QObject *> res;
-        res.reserve(m_parking.getRoads().count());
-        for(auto i : m_parking.getRoads())
+        res.reserve(m_parking.roadsList().count());
+        for(auto i : m_parking.roadsList())
             res.append(i);
 
         return res;

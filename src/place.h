@@ -17,10 +17,10 @@ class Place : public QObject
 public:
     Place(QRectF rect, int type, QObject *parent = 0);
 
-    Q_PROPERTY(double x READ x WRITE setX NOTIFY xChanged)
-    Q_PROPERTY(double y READ y WRITE setY NOTIFY yChanged)
-    Q_PROPERTY(double width READ width WRITE setWidth NOTIFY widthChanged)
-    Q_PROPERTY(double height READ height WRITE setHeight NOTIFY heightChanged)
+//    Q_PROPERTY(double x READ x WRITE setX NOTIFY xChanged)
+//    Q_PROPERTY(double y READ y WRITE setY NOTIFY yChanged)
+//    Q_PROPERTY(double width READ width WRITE setWidth NOTIFY widthChanged)
+//    Q_PROPERTY(double height READ height WRITE setHeight NOTIFY heightChanged)
 
     char type() const;
     void setType(char type);

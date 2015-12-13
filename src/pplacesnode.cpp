@@ -5,7 +5,7 @@ PPlacesNode::PPlacesNode(float size, const QColor &color)
 {
     setGeometry(&m_geometry);
     m_geometry.setLineWidth(size);
-    m_geometry.setDrawingMode(GL_LINE_LOOP);
+    m_geometry.setDrawingMode(GL_QUADS);
 
     QSGFlatColorMaterial *material = new QSGFlatColorMaterial;
     material->setColor(color);

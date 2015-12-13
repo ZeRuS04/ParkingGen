@@ -52,8 +52,8 @@ int SimpleAutoMarking::initialGrid()
 
     int dx = m_ox.last() - m_ox.first();
     int dy = m_oy.last() - m_oy.first();
-    m_length = m_parking->place().width() >= m_parking->place().height() ? m_parking->place().width()
-                                                                         : m_parking->place().height();
+    m_length = m_parking->place().width() < m_parking->place().height() ? m_parking->place().width() * 2
+                                                                        : m_parking->place().height() * 2;
     m_gridWidth = dx / m_length + 1;
     m_gridHeight = dy / m_length + 1;
 

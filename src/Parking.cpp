@@ -1,5 +1,6 @@
 #include <ctime>
 #include <qmath.h>
+#include <QLineF>
 
 #include "parking.h"
 #include "abstrautomarking.h"
@@ -78,34 +79,27 @@ QPointF ParkingQuickItem::checkNeighboring(double x, double y, int selectIndex)
     return retPoint;
 }
 
-QPointF ParkingQuickItem::findPointonLine(double x, double y)
+QVector3D ParkingQuickItem::findPointonLine(double x, double y)
 {
-    QPointF point(x,y);
 
-//    if(m_parking.vertexes().isEmpty())
-//        return point;
-//    QList<int> list;
-//    QPointF lastPoint(m_parking.vertexes().last());
+    QVector3D point(x,y, -1);
 
-//    // Ищем подходящие стороны многоугольника
-//    for(int i = 0; i < m_parking.vertexes().size(); i++){
-//        QPointF curPoint = m_parking.vertexes().at(i);
-//        if(((curPoint.x() <= x) && (x <= lastPoint.x())) || ((curPoint.x() >= x) && (x >= lastPoint.x())) ||
-//           ((curPoint.y() <= y) && (y <= lastPoint.y())) || ((curPoint.y() >= y) && (y >= lastPoint.y()))){
-//            list << i;
-//        }
-//        lastPoint = curPoint;
-//    }
-//    // проверяем среди подходящих на отсутствие пересечений
-//    foreach(int i, list){
-//        if(i != 0)
-//            lastPoint = m_parking.vertexes().at(i-1);
-//        else
-//            lastPoint = m_parking.vertexes().last();
-//        QPointF curPoint = m_parking.vertexes().at(i);
-//    }
+    double nx = x, ny = y, nz = -1;
+    int dl = INT_MAX;
+    for(int i = 0; i < m_parking.places().size(); ++i){
+        Place *p = m_parking.places().at(i);
+        QLineF l(x,y, p->x(), p->y());
+        if(dl > l.length()) {
+            dl = l.length();
+            nx = p->x();
+            ny = p->y();
+            nz = i;
+        }
+    }
 
-    return point;
+    point.setX(nx);
+    point.setY(ny);
+    return QVector3D(nx, ny, nz);
 
 }
 
@@ -128,38 +122,20 @@ bool ParkingQuickItem::startMarking()
 
 }
 
-void ParkingQuickItem::addEntry(double x, double y, int angle)
+void ParkingQuickItem::addEntry(double x, double y, double w, double h,  int index)
 {
-    QRectF entry, exit;
-    int width = m_parking.place().width();
-    switch(angle % 360) {
-    case 0:
-        exit = QRectF(x - width, y - width/2, width, width);
-        entry = QRectF(x, y - width/2, width, width);
-        break;
-    case 90:
-        exit = QRectF(x - width/2, y, width, width);
-        entry = QRectF(x - width/2, y - width, width, width);
-        break;
-    case 180:
-        entry = QRectF(x - width/2, y, width, width);
-        exit = QRectF(x - width/2, y - width, width, width);
-        break;
-    case 270:
-        entry = QRectF(x - width/2, y, width, width);
-        exit = QRectF(x - width/2, y - width, width, width);
-        break;
+    if( !m_parking.changePlacetype(index, TYPE_ROAD, true)) {
+        QRectF entry = QRectF(x, y, w, h);
+
+        Place *rEntry = new Place(entry, TYPE_ROAD);
+
+        m_parking.pushPlaceInList(rEntry);
     }
 
-    Place *rEntry = new Place(entry, TYPE_ROAD);
-    Place *rExit = new Place(exit, TYPE_ROAD);
-
-    m_parking.pushRoadInList(rEntry);
-    m_parking.pushRoadInList(rExit);
-
+    m_parkingChanged = true;
+    update();
     emit parkingChanged();
 }
-
 
 QSGNode *ParkingQuickItem::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *)
 {
@@ -181,7 +157,7 @@ QSGNode *ParkingQuickItem::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdateP
 //        QVector<QPointF> *points = new QVector<QPointF>;
         node->m_lines->updateGeometry(bounds, m_parking.vertexes());
         node->m_places->updateGeometry(bounds, m_parking.placesList());
-        node->m_roads->updateGeometry(bounds, m_parking.placesList());
+        node->m_roads->updateGeometry(bounds, m_parking.roadsList());
         emit parkingChanged();
     }
 
@@ -197,8 +173,6 @@ void ParkingQuickItem::geometryChanged(const QRectF &newGeometry, const QRectF &
     update();
     QQuickItem::geometryChanged(newGeometry, oldGeometry);
 }
-
-
 
 /***********************************
  *              Parking:
@@ -314,20 +288,40 @@ void Parking::setArea()
     }
     m_area = abs(res/2);
 }
-QVector<Place*> Parking::placesList() const
+
+QList<Place *> Parking::places() const
 {
     return m_places;
 }
 
-void Parking::setPlacesList(const QVector<Place *> &placesList)
+QVector<Place*> Parking::placesList() const
 {
-    m_places = placesList;
+    QVector<Place *> retArr;
+    for(int i = 0; i < m_places.length(); i++) {
+        if(m_places.at(i)->type() == TYPE_PARKINGPLACE)
+            retArr << m_places.at(i);
+    }
+    return retArr;
 }
+
+//void Parking::setPlacesList(const QVector<Place *> &placesList)
+//{
+//    m_entryMask.resize(placesList.length());
+//    m_places = placesList;
+//}
 
 void Parking::pushPlaceInList(Place* place)
 {
     m_places << place;
+    m_entryMask.fill(false, m_places.length());
+}
 
+void Parking::removePlace(int index)
+{
+    if(index > 0 && index < m_places.length()){
+        delete m_places[index];
+        m_places.removeAt(index);
+    }
 }
 
 void Parking::clearPlaces()
@@ -359,30 +353,28 @@ QPointF Parking::findCenter(QVector<QPointF> vertexes)
 
     return QPointF(ox.last() - ox.first(), oy.last() - oy.first());
 }
-QVector<Place *> Parking::getRoads() const
+
+QVector<Place *> Parking::roadsList() const
 {
-    return m_roads;
+    QVector<Place *> retArr;
+    for(int i = 0; i < m_places.length(); i++) {
+        if(m_places.at(i)->type() == TYPE_ROAD)
+            retArr << m_places.at(i);
+    }
+    return retArr;
 }
 
-void Parking::pushRoadInList(Place *road)
-{
-    m_roads << road;
-}
 
-void Parking::setRoads(const QVector<Place *> &roads)
+bool Parking::changePlacetype(int index, int type, bool isEntry)
 {
-    m_roads = roads;
-}
+    if((index < 0) || (index >= m_places.length()))
+        return false;
+    m_places[index]->setType(type);
 
-void Parking::clearRoads()
-{
-    m_roads.clear();
-}
-
-void Parking::removeRoad(int index)
-{
-    if(index > 0 && index < m_roads.length());
-        m_roads.remove(index);
+    if(type == TYPE_ROAD && isEntry) {
+        m_entryMask.setBit(index, true);
+    }
+    return true;
 }
 
 
