@@ -38,14 +38,14 @@ ApplicationWindow {
                         }
                         break;
                     case 1:
-                            parking.addEntry(mouse.x, mouse.y, entry.rotation)
+                            parking.addEntry(entry.x, entry.y, entry.width, entry.height, entry.point.z)
                         break;
                     }
                 }
                 onPositionChanged: {
                     switch(mode.currentIndex){
                     case 0:
-                        var point = parking.checkNeighboring(mouse.x,mouse.y,  parking.currentVertex);
+                        var point = parking.checkNeighboring(mouse.x,mouse.y, parking.currentVertex);
                         parking.changeVertex(point.x, point.y,  parking.currentVertex);
                         parking.posChanged(parking.currentVertex);
                         break;
@@ -99,36 +99,23 @@ ApplicationWindow {
 
         Rectangle{
             id:  entry
-            property var point: parking.findPointonLine(parkingMA.mouseX - width/2,parkingMA.mouseY - height/2)
+            property vector3d point: parking.findPointonLine(parkingMA.mouseX - width/2,parkingMA.mouseY - height/2)
             x: point.x
             y: point.y
             visible: mode.currentIndex === 1
-            width: placeWidth.value * 2
-            height: placeHeigh.value
-            color: "transparent"
-            rotation: 0
-            Rectangle {
-                width: placeWidth.value
-                height: parent.height
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                color: "darkred"
-            }
-            Rectangle {
-                width: placeWidth.value
-                height: parent.height
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                color: "lightgreen"
-            }
+            width: placeWidth.value < placeHeigh.value ? placeWidth.value * 2
+                                                       : placeHeigh.value * 2
+            height: width
+            color: "blue"
+
             MouseArea {
                 anchors.fill: parent
-                onWheel: {
-                    if (wheel.angleDelta.y > 0)
-                        parent.rotation += 90;
-                    else
-                        parent.rotation -= 90;
-                }
+//                onWheel: {
+//                    if (wheel.angleDelta.y > 0)
+//                        parent.rotation += 90;
+//                    else
+//                        parent.rotation -= 90;
+//                }
                 onPressed: mouse.accepted = false
             }
         }
